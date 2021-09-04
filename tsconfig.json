@@ -1,0 +1,10 @@
+{
+	"compilerOptions": {
+		"target": "es2021",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"lib": ["es2021", "dom"],
+		"strict": true,
+		"incremental": true
+	}
+}

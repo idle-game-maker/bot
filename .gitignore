@@ -1,0 +1,7 @@
+.env
+.metals
+.vscode/settings.json
+tsconfig.tsbuildinfo
+node_modules
+**/*.js
+**/*.sqlite
