@@ -1,11 +1,11 @@
 import { Client, Intents } from 'discord.js';
-import { token } from './secrets.js';
-import { sequelize } from './db.js';
+import { token } from './secrets.js'
 import { start } from './server.js';
 import { iter as wrapIterator, aiter as wrapAsyncIterator } from 'iterator-helper';
 import { awaitIterator, zip } from './utils.js';
 import { Command } from './commands/types.js';
 import { opendir } from 'fs/promises';
+import isMain from 'es-main';
 
 const commandNames = await awaitIterator(wrapAsyncIterator(await opendir('./commands')).filter(file => file.isFile() && file.name.endsWith('.js') && file.name !== 'types.js').map(file => file.name.replace(/\.js$/, '')));
 const commandSet = await Promise.all(commandNames.map(async name => (await import(`./commands/${name}.js`)) as Command));
@@ -27,6 +27,7 @@ bot.on('interactionCreate', async interaction => {
 	}
 });
 
-await start();
-
-bot.login(token);
+if (isMain(import.meta)) {
+	await start();
+	bot.login(token);
+}
