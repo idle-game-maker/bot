@@ -1,8 +1,8 @@
-import type { ModelDefined, Optional } from 'sequelize';
+import { Association, BelongsToGetAssociationMixin, HasManyAddAssociationMixin, HasManyGetAssociationsMixin, Optional } from 'sequelize';
 import type * as _type_Sequelize from 'sequelize';
 import { createRequire } from 'module';
 const req = createRequire(import.meta.url);
-const { DataTypes } = req('sequelize') as unknown as typeof _type_Sequelize;
+const { DataTypes, Model } = req('sequelize') as unknown as typeof _type_Sequelize;
 import { sequelize } from '../db.js';
 import { User } from './User.js';
 import { Vote } from './Vote.js';
@@ -15,8 +15,32 @@ export interface GameAttributes {
 
 type GameCreationAttributes = Optional<GameAttributes, 'id'>;
 
-export const Game: ModelDefined<GameAttributes, GameCreationAttributes> = sequelize.define(
-	'Game',
+interface GameMixins {
+	getGameVersions: HasManyGetAssociationsMixin<GameVersion>;
+	addGameVersion: HasManyAddAssociationMixin<GameVersion, number>;
+	getUser: BelongsToGetAssociationMixin<User>;
+}
+
+export class Game extends Model<GameAttributes, GameCreationAttributes>
+	implements GameMixins, GameAttributes {
+	id!: number;
+	name!: string;
+
+	public readonly createdAt!: Date;
+	public readonly updatedAt!: Date;
+
+	public getGameVersions!: HasManyGetAssociationsMixin<GameVersion>;
+	public addGameVersion!: HasManyAddAssociationMixin<GameVersion, number>;
+	public getUser!: BelongsToGetAssociationMixin<User>;
+
+	public readonly gameVersions?: GameVersion[];
+
+	public static associations: {
+		gameVersions: Association<Game, GameVersion>;
+	};
+}
+
+Game.init(
 	{
 		id: {
 			type: DataTypes.INTEGER.UNSIGNED,
@@ -29,7 +53,8 @@ export const Game: ModelDefined<GameAttributes, GameCreationAttributes> = sequel
 		},
 	},
 	{
-		tableName: 'games'
+		tableName: 'games',
+		sequelize,
 	}
 );
 

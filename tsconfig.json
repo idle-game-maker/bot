@@ -6,6 +6,7 @@
 		"lib": ["es2021", "dom"],
 		"strict": true,
 		"incremental": true,
-		"allowSyntheticDefaultImports": true
+		"allowSyntheticDefaultImports": true,
+		"sourceMap": true
 	}
 }

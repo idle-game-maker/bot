@@ -1,8 +1,8 @@
-import type { ModelDefined, Optional } from 'sequelize';
+import { BelongsToGetAssociationMixin, Optional } from 'sequelize';
 import type * as _type_Sequelize from 'sequelize';
 import { createRequire } from 'module';
 const req = createRequire(import.meta.url);
-const { DataTypes } = req('sequelize') as unknown as typeof _type_Sequelize;
+const { DataTypes, Model } = req('sequelize') as unknown as typeof _type_Sequelize;
 import { sequelize } from '../db.js';
 import { Game } from './Game.js';
 
@@ -16,8 +16,25 @@ export interface GameVersionAttributes {
 
 type GameVersionCreationAttributes = Optional<GameVersionAttributes, 'id'>;
 
-export const GameVersion: ModelDefined<GameVersionAttributes, GameVersionCreationAttributes> = sequelize.define(
-	'GameVersion',
+interface GameVersionMixins {
+	getGame: BelongsToGetAssociationMixin<Game>;
+}
+
+export class GameVersion extends Model<GameVersionAttributes, GameVersionCreationAttributes>
+	implements GameVersionAttributes, GameVersionMixins {
+	id!: number;
+	major!: number;
+	minor!: number;
+	patch!: number;
+	status!: 'alpha' | 'beta' | 'release';
+
+	public readonly createdAt!: Date;
+	public readonly updatedAt!: Date;
+
+	getGame!: BelongsToGetAssociationMixin<Game>;
+}
+
+GameVersion.init(
 	{
 		id: {
 			type: DataTypes.INTEGER.UNSIGNED,
@@ -52,7 +69,8 @@ export const GameVersion: ModelDefined<GameVersionAttributes, GameVersionCreatio
 		},
 	},
 	{
-		tableName: 'versions'
+		tableName: 'versions',
+		sequelize,
 	}
 );
 

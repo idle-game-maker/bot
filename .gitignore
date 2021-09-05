@@ -5,3 +5,4 @@ tsconfig.tsbuildinfo
 node_modules
 **/*.js
 **/*.sqlite
+**/*.map

@@ -1,9 +1,12 @@
-import { bot } from './index.js';
-import { GuildEmoji } from 'discord.js';
+const emojiGuild = '884139129720422500';
 
-const emojiGuild = bot.guilds.cache.get('884139129720422500')!;
+function makeEmoji(name: string, id: string) {
+	return `<:${name}:${id}>`;
+}
 
-export const alpha = new GuildEmoji(bot, { id: '884140924337291344', name: 'alpha' }, emojiGuild);
-export const beta = new GuildEmoji(bot, { id: '884140924362444860', name: 'beta' }, emojiGuild);
-export const mu = new GuildEmoji(bot, { id: '884148767316647988', name: 'mu' }, emojiGuild);
-export const sigma = new GuildEmoji(bot, { id: '884148767765438524', name: 'sigma' }, emojiGuild);
+console.log('after guild', emojiGuild);
+
+export const alpha = makeEmoji('alpha', '884140924337291344');
+export const beta = makeEmoji('beta', '884140924362444860');
+export const mu = makeEmoji('mu', '884148767316647988');
+export const sigma = makeEmoji('sigma', '884148767765438524');
