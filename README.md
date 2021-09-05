@@ -16,7 +16,7 @@ Copy `.example.env` into `.env` and fill in the values:
 - `DB_USERNAME` and `DB_PASSWORD` are the credentials for the SQLite database
 
 ```sh
-npm run register
+npm run commands
 npm start
 ```
 
