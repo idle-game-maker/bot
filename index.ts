@@ -2,7 +2,14 @@ import { Client, Intents } from 'discord.js';
 import { token } from './secrets.js';
 import { sequelize } from './db.js';
 import { start } from './server.js';
-import { Ping } from './models/Ping.js';
+import { iter as wrapIterator, aiter as wrapAsyncIterator } from 'iterator-helper';
+import { awaitIterator, zip } from './utils.js';
+import { Command } from './commands/types.js';
+import { opendir } from 'fs/promises';
+
+const commandNames = await awaitIterator(wrapAsyncIterator(await opendir('./commands')).filter(file => file.isFile() && file.name.endsWith('.js') && file.name !== 'types.js').map(file => file.name.replace(/\.js$/, '')));
+const commandSet = await Promise.all(commandNames.map(async name => (await import(`./commands/${name}.js`)) as Command));
+const commands = Object.fromEntries(zip(commandNames, commandSet));
 
 const bot = new Client({ intents: [ Intents.FLAGS.GUILDS ]});
 
@@ -12,13 +19,10 @@ bot.on('ready', () => {
 
 bot.on('interactionCreate', async interaction => {
 	if (interaction.isCommand()) {
-		switch (interaction.commandName) {
-			case 'ping':
-				const { count: pings } = await Ping.findAndCountAll({ where: { user: interaction.user.id } });
-				await Ping.create({
-					user: interaction.user.id
-				});
-				await interaction.reply(`Pong! This is your ${pings === 0 ? 'first ping!' : `ping number ${pings + 1}.`}`);
+		if (interaction.commandName in commands) {
+			await commands[interaction.commandName].run(interaction);
+		} else {
+			await interaction.reply({ content: `Unknown command ${interaction.commandName}`, ephemeral: true });
 		}
 	}
 });
