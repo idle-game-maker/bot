@@ -11,7 +11,7 @@ const commandNames = await awaitIterator(wrapAsyncIterator(await opendir('./comm
 const commandSet = await Promise.all(commandNames.map(async name => (await import(`./commands/${name}.js`)) as Command));
 const commands = Object.fromEntries(zip(commandNames, commandSet));
 
-const bot = new Client({ intents: [ Intents.FLAGS.GUILDS ]});
+export const bot = new Client({ intents: [ Intents.FLAGS.GUILDS ]});
 
 bot.on('ready', () => {
 	console.info(`Logged in as ${bot.user!.tag} and ready to work!`);

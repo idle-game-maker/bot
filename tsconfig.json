@@ -5,6 +5,7 @@
 		"moduleResolution": "node",
 		"lib": ["es2021", "dom"],
 		"strict": true,
-		"incremental": true
+		"incremental": true,
+		"allowSyntheticDefaultImports": true
 	}
 }
