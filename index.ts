@@ -1,6 +1,7 @@
 import { Client, Intents } from 'discord.js';
 import { token } from './secrets.js';
 import { sequelize } from './db.js';
+import { start } from './server.js';
 import { Ping } from './models/Ping.js';
 
 const bot = new Client({ intents: [ Intents.FLAGS.GUILDS ]});
@@ -21,5 +22,7 @@ bot.on('interactionCreate', async interaction => {
 		}
 	}
 });
+
+await start();
 
 bot.login(token);
