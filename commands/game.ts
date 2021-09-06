@@ -1,8 +1,8 @@
+import type { GameVersion } from '@prisma/client';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { CommandInteraction } from 'discord.js';
-import { Game } from '../models/Game.js';
-import { GameVersion } from '../models/GameVersion.js';
 import * as emojis from '../emojis.js';
+import { prisma } from '../db.js';
 // import { bot } from '../index.js'
 
 export const data = new SlashCommandBuilder()
@@ -19,7 +19,7 @@ export const data = new SlashCommandBuilder()
 					.addChoices([
 						['α ~ Open alpha release', 'alpha'],
 						['β ~ Beta release', 'beta'],
-						['ω ~ Full release', 'release'],
+						['Σ ~ Full release', 'release'],
 					])
 					.setRequired(false)
 			)
@@ -70,7 +70,7 @@ export const data = new SlashCommandBuilder()
 					.addChoices([
 						['α ~ Open alpha release', 'alpha'],
 						['β ~ Beta release', 'beta'],
-						['ω ~ Full release', 'release'],
+						['Σ ~ Full release', 'release'],
 					])
 					.setRequired(true)
 			)
@@ -91,9 +91,9 @@ function showLatestVersion(versions: GameVersion[]) {
 	if (versions.length === 0) return `unreleased`;
 	const latest = versions.slice().sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
 	return `${
-		latest.status === 'release' ? emojis.sigma :
-		latest.status === 'beta' ? emojis.beta :
-		latest.status === 'alpha' ? emojis.alpha : (() => { throw new Error('aaaaaa') })()
+		latest.status === 'RELEASE' ? emojis.sigma :
+		latest.status === 'BETA' ? emojis.beta :
+		latest.status === 'ALPHA' ? emojis.alpha : (() => { throw new Error('aaaaaa') })()
 	} ${latest.major}.${latest.minor}.${latest.patch}`;
 }
 
@@ -109,21 +109,21 @@ export async function run(interaction: CommandInteraction) {
 }
 
 async function list(interaction: CommandInteraction) {
-	let games = await Game.findAll({ include: GameVersion });
+	let games = await prisma.game.findMany({ include: { versions: true, author: true } });
 	if (interaction.options.getString('filter')) {
 		const filter = interaction.options.getString('filter', true);
 		games = await Promise.all(games.map(async game => {
-			const versions = await game.getGameVersions();
+			const versions = game.versions;
 			return [game, versions.some(v => v.status === filter)] as const;
 		})).then(gs => gs.filter(([g, has]) => has).map(([g]) => g));
 	}
 	let str = '';
 	for (const game of games) {
 		str += `* ${
-			game.gameVersions!.some(v => v.status === 'release') ? emojis.sigma :
-			game.gameVersions!.some(v => v.status === 'beta') ? emojis.beta :
-			game.gameVersions!.some(v => v.status === 'alpha') ? emojis.alpha :
+			game.versions.some(v => v.status === 'RELEASE') ? emojis.sigma :
+			game.versions.some(v => v.status === 'BETA') ? emojis.beta :
+			game.versions.some(v => v.status === 'ALPHA') ? emojis.alpha :
 			emojis.mu
-		} ${game.name} (${showLatestVersion(game.gameVersions!)}) by ${(await game.getUser()).id} with ID ${game.id}`;
+		} ${game.name} (${showLatestVersion(game.versions)}) by ${game.author.userId} with ID ${game.id}`;
 	}
 }

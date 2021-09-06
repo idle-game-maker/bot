@@ -1,6 +1,11 @@
 import { bot } from './index.js';
 import { start } from './server.js';
 import { token } from './secrets.js';
+import { prisma } from './db.js';
 
-await start();
-bot.login(token);
+try {
+	await start();
+	bot.login(token);
+} finally {
+	await prisma.$disconnect();
+}
